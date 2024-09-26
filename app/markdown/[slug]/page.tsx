@@ -1,4 +1,6 @@
-import { Suspense } from "react";
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypeHighlight from "rehype-highlight";
 import remarkMath from "remark-math";
@@ -16,13 +18,37 @@ async function fetchArticle(slug: string) {
   return res.json();
 }
 
-export default async function FinanceTopicPage({
+export default function FinanceTopicPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const { content, title } = await fetchArticle(params.slug);
-  const cleanTitle = title.replace(/\*\*/g, "");
+  const [article, setArticle] = useState<{
+    content: string;
+    title: string;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadArticle() {
+      try {
+        const data = await fetchArticle(params.slug);
+        setArticle(data);
+      } catch {
+        setError("Failed to fetch article");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadArticle();
+  }, [params.slug]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!article) return <div>No article found</div>;
+
+  const cleanTitle = article.title.replace(/\*\*/g, "");
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -32,14 +58,14 @@ export default async function FinanceTopicPage({
       <div className="lg:grid lg:grid-cols-4 lg:gap-8">
         <aside className="lg:col-span-1 mb-8 lg:mb-0">
           <div className="sticky top-8 overflow-y-auto max-h-[calc(100vh-4rem)]">
-            <TableOfContents content={content} />
+            <TableOfContents content={article.content} />
           </div>
         </aside>
         <main className="lg:col-span-3">
           <article className="prose prose-lg dark:prose-invert max-w-none">
             <Suspense fallback={<div>Loading...</div>}>
               <MDXRemote
-                source={content}
+                source={article.content}
                 options={{
                   mdxOptions: {
                     remarkPlugins: [remarkMath],
