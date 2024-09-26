@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { slug } = params;
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
+
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Slug parameter is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log(slug);
     const markdownFolder = path.join(process.cwd(), "app/markdown");
     const filePath = path.join(markdownFolder, `${slug}.md`);
 
@@ -19,10 +26,7 @@ export async function GET(
 
     return NextResponse.json({ content, title });
   } catch (error) {
-    console.error(
-      `Error reading markdown file for slug ${params.slug}:`,
-      error
-    );
+    console.error(`Error reading markdown file for slug:`, error);
     return NextResponse.json(
       { error: "Failed to fetch article content" },
       { status: 404 }
