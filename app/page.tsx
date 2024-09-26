@@ -1,28 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
 
 interface Article {
   slug: string;
   title: string;
 }
 
+async function fetchArticles() {
+  const response = await fetch("/api/articles");
+  if (!response.ok) throw new Error("Failed to fetch articles");
+  return response.json();
+}
+
 export default function FinanceHub() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [articles, setArticles] = useState<Article[]>([]);
 
-  useEffect(() => {
-    fetch("/api/articles")
-      .then((response) => response.json())
-      .then((data) => setArticles(data));
-  }, []);
+  const {
+    data: articles = [],
+    isLoading,
+    error,
+  } = useQuery<Article[]>({
+    queryKey: ["articles"],
+    queryFn: fetchArticles,
+  });
 
   const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) return <div className="text-center py-8">Loading...</div>;
+  if (error)
+    return (
+      <div className="text-center py-8 text-red-500">
+        Error: {error.message}
+      </div>
+    );
 
   return (
     <div className="container mx-auto px-4 py-8">

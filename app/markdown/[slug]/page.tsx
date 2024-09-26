@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypeHighlight from "rehype-highlight";
 import remarkMath from "remark-math";
@@ -9,6 +9,7 @@ import rehypeSlug from "rehype-slug";
 import "katex/dist/katex.min.css";
 import TableOfContents from "@/components/TableOfContents";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 async function fetchArticle(slug: string) {
   const res = await fetch(`/api/article?slug=${slug}`, { cache: "no-store" });
@@ -21,36 +22,29 @@ export default function FinanceTopicPage({
 }: {
   params: { slug: string };
 }) {
-  const [article, setArticle] = useState<{
-    content: string;
-    title: string;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showToc, setShowToc] = useState(false);
 
-  useEffect(() => {
-    async function loadArticle() {
-      try {
-        const data = await fetchArticle(params.slug);
-        setArticle(data);
-      } catch {
-        setError("Failed to fetch article");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadArticle();
-  }, [params.slug]);
+  const {
+    data: article,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["article", params.slug],
+    queryFn: () => fetchArticle(params.slug),
+  });
 
   if (isLoading) return <div className="text-center py-8">Loading...</div>;
   if (error)
-    return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+    return (
+      <div className="text-center py-8 text-red-500">
+        Error: {error.message}
+      </div>
+    );
   if (!article) return <div className="text-center py-8">No article found</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 text-center">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-8 text-center tracking-tight leading-none">
         {article.title}
       </h1>
       <div className="lg:grid lg:grid-cols-4 lg:gap-8">
@@ -86,6 +80,50 @@ export default function FinanceTopicPage({
                       remarkPlugins: [remarkMath],
                       rehypePlugins: [rehypeHighlight, rehypeKatex, rehypeSlug],
                     },
+                  }}
+                  components={{
+                    h1: (props) => (
+                      <h1
+                        className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-6 tracking-tight leading-none"
+                        {...props}
+                      />
+                    ),
+                    h2: (props) => (
+                      <h2
+                        className="text-xl sm:text-2xl md:text-3xl font-bold my-5 tracking-tight leading-tight"
+                        {...props}
+                      />
+                    ),
+                    h3: (props) => (
+                      <h3
+                        className="text-lg sm:text-xl md:text-2xl font-semibold my-4 tracking-tight leading-snug"
+                        {...props}
+                      />
+                    ),
+                    h4: (props) => (
+                      <h4
+                        className="text-base sm:text-lg md:text-xl font-medium my-3 tracking-tight leading-snug"
+                        {...props}
+                      />
+                    ),
+                    h5: (props) => (
+                      <h5
+                        className="text-sm sm:text-base md:text-lg font-medium my-2 tracking-tight leading-snug"
+                        {...props}
+                      />
+                    ),
+                    h6: (props) => (
+                      <h6
+                        className="text-xs sm:text-sm md:text-base font-medium my-2 tracking-tight leading-snug"
+                        {...props}
+                      />
+                    ),
+                    p: (props) => (
+                      <p
+                        className="text-sm sm:text-base leading-relaxed my-3"
+                        {...props}
+                      />
+                    ),
                   }}
                 />
               </div>
