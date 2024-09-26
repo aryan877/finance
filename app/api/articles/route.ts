@@ -4,7 +4,7 @@ import path from "path";
 
 export async function GET() {
   try {
-    const markdownFolder = path.join(process.cwd(), "app/markdown");
+    const markdownFolder = path.join(process.cwd(), "app/blog");
     const files = await fs.readdir(markdownFolder);
 
     const articles = await Promise.all(

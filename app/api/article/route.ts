@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(slug);
-    const markdownFolder = path.join(process.cwd(), "app/markdown");
+    const markdownFolder = path.join(process.cwd(), "app/blog");
     const filePath = path.join(markdownFolder, `${slug}.md`);
 
     const content = await fs.readFile(filePath, "utf-8");
