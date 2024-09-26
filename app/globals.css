@@ -110,3 +110,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+.markdown-content {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.markdown-content pre,
+.markdown-content code,
+.markdown-content .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-content .katex-display > .katex {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.markdown-content .katex-display > .katex > .katex-html {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+@media (max-width: 640px) {
+  .markdown-content .katex-display {
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-content .katex-display {
+    font-size: 0.8em;
+  }
+}

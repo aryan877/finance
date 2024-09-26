@@ -72,7 +72,7 @@ export default function FinanceTopicPage({
                 <div className="text-center py-4">Loading content...</div>
               }
             >
-              <div className="overflow-x-auto">
+              <div className="markdown-content">
                 <MDXRemote
                   source={article.content}
                   options={{
@@ -120,7 +120,7 @@ export default function FinanceTopicPage({
                     ),
                     p: (props) => (
                       <p
-                        className="text-sm sm:text-base leading-relaxed my-3"
+                        className="text-sm sm:text-base leading-relaxed my-3 break-words"
                         {...props}
                       />
                     ),
